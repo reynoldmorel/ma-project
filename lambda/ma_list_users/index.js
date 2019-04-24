@@ -83,18 +83,17 @@ function getUsers(page) {
     if(page.searchText)
         return documentClient.query({
             TableName : "user",
-            IndexName: "name-index",
+            IndexName: "status-index",
             Limit: page.pageSize,
             ExclusiveStartKey: page.lastEvaluatedKey,
-            KeyConditionExpression: "contains(#login, :login) or contains(#name, :name)",
+            KeyConditionExpression: "#status = :status",
+            FilterConditionExpression: "begins_with(#name, " + page.searchText + ")",
             ExpressionAttributeNames:{
-                "#login": "login",
-                "#name": "name"
+                "#status": "status"
             },
             ExpressionAttributeValues: {
-                ":login": page.searchText,
-                ":name": page.searchText
-            }
+                ":status": "ACTIVE"
+            },
         }).promise();
     else
         return documentClient.scan({
@@ -108,15 +107,14 @@ function getUsersCount(page) {
     if(page.searchText)
         return documentClient.query({
             TableName : "user",
-            IndexName: "name-index",
-            KeyConditionExpression: "contains(#login, :login) or contains(#name, :name)",
+            IndexName: "status-index",
+            KeyConditionExpression: "#status = :status",
+            FilterConditionExpression: "begins_with(#name, " + page.searchText + ")",
             ExpressionAttributeNames:{
-                "#login": "login",
-                "#name": "name"
+                "#status": "status"
             },
             ExpressionAttributeValues: {
-                ":login": page.searchText,
-                ":name": page.searchText
+                ":status": "ACTIVE"
             },
             Select: "COUNT"
         }).promise();
@@ -125,6 +123,15 @@ function getUsersCount(page) {
             TableName : "user",
             Select: "COUNT"
         }).promise();
+}
+
+function getUserById(userId) {
+    return documentClient.get({
+        TableName : "user",
+        Key:{
+            "userId": userId
+        }
+    }).promise();
 }
 
 function getUserById(userId) {

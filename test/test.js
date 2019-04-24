@@ -78,13 +78,12 @@ function testMAapi(token) {
 
 function testMAApiWithLoggedUser(token, currentUser) {
     describe("ma-user API tests", () => {
-        describe("List", () => {
+        describe("Get User List", () => {
             it("Should retrieved all existing users", (done) => {
                 chai.request(api.ma.host)
                     .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId)
                     .set("Authorization", "Bearer " + token)
                     .end((err, res) => {
-                        console.log(res);
                         res.should.have.status(200);
                         res.body.should.be.a("object");
                         res.body.should.have.property("data");
@@ -92,6 +91,42 @@ function testMAApiWithLoggedUser(token, currentUser) {
                         res.body.data.should.have.property("Items");
                         res.body.data.Items.should.be.a("array");
                         res.body.should.have.property("count");
+                        done();
+                    });
+            });
+            it("Should retrieved paginated list of users with total count", (done) => {
+                chai.request(api.ma.host)
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=1")
+                    .set("Authorization", "Bearer " + token)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.be.a("object");
+                        res.body.should.have.property("data");
+                        res.body.data.should.be.a("object");
+                        res.body.data.should.have.property("Items");
+                        res.body.data.Items.should.be.a("array");
+                        res.body.data.Items.length.should.eql(1);
+                        res.body.should.have.property("count");
+                        res.body.count.should.be.a("object");
+                        res.body.count.should.have.property("Count");
+                        done();
+                    });
+            });
+            it("Should retrieved paginated list of users with total count = 0 for searText = 'There_is_no_user_with_this_name'", (done) => {
+                chai.request(api.ma.host)
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=1&searchText=There_is_no_user_with_this_name")
+                    .set("Authorization", "Bearer " + token)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.be.a("object");
+                        res.body.should.have.property("data");
+                        res.body.data.should.be.a("object");
+                        res.body.data.should.have.property("Items");
+                        res.body.data.Items.should.be.a("array");
+                        res.body.data.Items.length.should.eql(1);
+                        res.body.should.have.property("count");
+                        res.body.count.should.be.a("object");
+                        res.body.count.should.have.property("Count");
                         done();
                     });
             });
