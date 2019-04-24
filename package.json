@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "description": "MA Project",
   "main": "index.js",
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-http": "^2.0.1",
-    "mocha": "^2.4.5"
-  },
   "scripts": {
     "test": "mocha --timeout 10000"
   },
@@ -20,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/reynoldmorel/ma-project/issues"
   },
-  "homepage": "https://github.com/reynoldmorel/ma-project#readme"
+  "homepage": "https://github.com/reynoldmorel/ma-project#readme",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "mocha": "^6.1.4"
+  }
 }
