@@ -22,8 +22,9 @@ exports.handler = (event, context, callback) => {
         return;
     }
     
-    getUserById(event.body.currentUserId).then((currentUser) => {
-        if(currentUser && (currentUser.roles.indexOf("ADMIN") || currentUser.roles.indexOf("USER"))) {
+    getUserById(event.body.currentUserId).then((currentUserResult) => {
+        const currentUser = currentUserResult.Item;
+        if(currentUser && (currentUser.roles.indexOf("ADMIN") > -1 || currentUser.roles.indexOf("USER") > -1)) {
     
             if(!event.body.roles) event.body.roles = ["DEFAULT"];
             
@@ -133,15 +134,10 @@ function getUserByLogin(login) {
 }
 
 function getUserById(userId) {
-    return documentClient.query({
+    return documentClient.get({
         TableName : "user",
-        IndexName: "userId-index",
-        KeyConditionExpression: "#userId = :userId",
-        ExpressionAttributeNames:{
-            "#userId": "userId"
-        },
-        ExpressionAttributeValues: {
-            ":userId": userId
+        Key:{
+            "userId": userId
         }
     }).promise();
 }

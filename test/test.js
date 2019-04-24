@@ -1,7 +1,7 @@
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = "test";
 
-const chai = require('chai');
-const chaiHttp = require('chai-http');
+const chai = require("chai");
+const chaiHttp = require("chai-http");
 const should = chai.should();
 
 const api = {
@@ -28,19 +28,20 @@ const api = {
 
 chai.use(chaiHttp);
 
-describe('Oauth 2.0 Authentication', () => {
-    describe('Authorize', () => {
-        it('It should return the token', (done) => {
+describe("Oauth 2.0 Authentication", () => {
+    describe("Authorize", () => {
+        it("It should return the token", (done) => {
             chai.request(api.oauth.host)
                 .post(api.oauth.tokenService)
                 .set("Authorization", api.oauth.headers.authorizationBasic)
                 .set("Content-Type", api.oauth.headers.contentType)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    res.body.should.have.property('access_token');
-                    res.body.should.have.property('expires_in');
-                    res.body.should.have.property('token_type');
-                    const token = res.body["acess_token"];
+                    res.body.should.be.a("object");
+                    res.body.should.have.property("access_token");
+                    res.body.should.have.property("expires_in");
+                    res.body.should.have.property("token_type");
+                    const token = res.body["access_token"];
                     done();
                     testMAapi(token);
                 });
@@ -53,43 +54,45 @@ function testMAapi(token) {
         login: "admin",
         password: "123456"
     };
-   
-    describe('ma-user API tests', () => {
-        describe('Login', () => {
-            it('Should retrieved the user', (done) => {
+
+    describe("ma-user API tests", () => {
+        describe("Login", () => {
+            it("Should retrieved the user", (done) => {
                 chai.request(api.ma.host)
                     .post(api.ma.user.loginService)
                     .set("Authorization", "Bearer " + token)
                     .send(loginCredentials)
                     .end((err, res) => {
                         res.should.have.status(200);
-                        res.body.should.have.property('data');
-                        res.body.should.be.a('object');
-                        res.body.data.should.have.property('userId');
-                        const currentUser = res.body.data 
+                        res.body.should.be.a("object");
+                        res.body.should.have.property("data");
+                        res.body.data.should.have.property("userId");
+                        const currentUser = res.body.data
                         done();
-                        testMAApiWithLoggedUser(currentUser);
+                        testMAApiWithLoggedUser(token, currentUser);
                     });
             });
         });
     });
 }
 
-function testMAApiWithLoggedUser(currentUser) {
-    describe('ma-user API tests', () => {
-        describe('List', () => {
-            it('Should retrieved all the users', (done) => {
+function testMAApiWithLoggedUser(token, currentUser) {
+    describe("ma-user API tests", () => {
+        describe("List", () => {
+            it("Should retrieved all existing users", (done) => {
                 chai.request(api.ma.host)
-                    .get(api.ma.user.listService)
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId)
                     .set("Authorization", "Bearer " + token)
                     .end((err, res) => {
+                        console.log(res);
                         res.should.have.status(200);
-                        res.body.should.have.property('data');
-                        res.body.should.be.a('object');
-                        res.body.data.should.have.property('userId');
-                        currentUser = res.body.data 
+                        res.body.should.be.a("object");
+                        res.body.should.have.property("data");
+                        res.body.data.should.be.a("object");
+                        res.body.data.should.have.property("Items");
+                        res.body.data.Items.should.be.a("array");
+                        res.body.should.have.property("count");
                         done();
-                        testMAapi(token);
                     });
             });
         });
