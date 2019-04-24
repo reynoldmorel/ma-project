@@ -37,9 +37,9 @@ describe('Oauth 2.0 Authentication', () => {
                 .set("Content-Type", api.oauth.headers.contentType)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    res.body.should.have.own.property('access_token');
-                    res.body.should.have.own.property('expires_in');
-                    res.body.should.have.own.property('token_type');
+                    res.body.should.have.property('access_token');
+                    res.body.should.have.property('expires_in');
+                    res.body.should.have.property('token_type');
                     const token = res.body["acess_token"];
                     done();
                     testMAapi(token);
@@ -53,21 +53,41 @@ function testMAapi(token) {
         login: "admin",
         password: "123456"
     };
-    let currentUser = null;
    
     describe('ma-user API tests', () => {
         describe('Login', () => {
             it('Should retrieved the user', (done) => {
-                chai.request(api.oauth.host)
-                    .post(api.oauth.token)
-                    .set("Authorization", api.oauth.headers.authorizationBasic)
-                    .set("Content-Type", api.oauth.headers.contentType)
+                chai.request(api.ma.host)
+                    .post(api.ma.user.loginService)
+                    .set("Authorization", "Bearer " + token)
+                    .send(loginCredentials)
                     .end((err, res) => {
                         res.should.have.status(200);
-                        res.body.should.have.own.property('access_token');
-                        res.body.should.have.own.property('expires_in');
-                        res.body.should.have.own.property('token_type');
-                        const token = res.body["acess_token"];
+                        res.body.should.have.property('data');
+                        res.body.should.be.a('object');
+                        res.body.data.should.have.property('userId');
+                        const currentUser = res.body.data 
+                        done();
+                        testMAApiWithLoggedUser(currentUser);
+                    });
+            });
+        });
+    });
+}
+
+function testMAApiWithLoggedUser(currentUser) {
+    describe('ma-user API tests', () => {
+        describe('List', () => {
+            it('Should retrieved all the users', (done) => {
+                chai.request(api.ma.host)
+                    .get(api.ma.user.listService)
+                    .set("Authorization", "Bearer " + token)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.have.property('data');
+                        res.body.should.be.a('object');
+                        res.body.data.should.have.property('userId');
+                        currentUser = res.body.data 
                         done();
                         testMAapi(token);
                     });
