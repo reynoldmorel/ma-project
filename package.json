@@ -1,0 +1,24 @@
+{
+  "name": "ma-project",
+  "version": "1.0.0",
+  "description": "MA Project",
+  "main": "index.js",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "mocha": "^2.4.5"
+  },
+  "scripts": {
+    "test": "mocha --timeout 10000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reynoldmorel/ma-project.git"
+  },
+  "author": "Reynold Morel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reynoldmorel/ma-project/issues"
+  },
+  "homepage": "https://github.com/reynoldmorel/ma-project#readme"
+}
