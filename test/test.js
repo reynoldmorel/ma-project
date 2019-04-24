@@ -105,7 +105,9 @@ function testMAApiWithLoggedUser(token, currentUser) {
                         res.body.data.should.be.a("object");
                         res.body.data.should.have.property("Items");
                         res.body.data.Items.should.be.a("array");
-                        res.body.data.Items.length.should.eql(1);
+                        res.body.data.should.have.property("LastEvaluatedKey");
+                        res.body.data.LastEvaluatedKey.should.be.a("object");
+                        res.body.data.Items.length.should.eq(1);
                         res.body.should.have.property("count");
                         res.body.count.should.be.a("object");
                         res.body.count.should.have.property("Count");
@@ -123,7 +125,9 @@ function testMAApiWithLoggedUser(token, currentUser) {
                         res.body.data.should.be.a("object");
                         res.body.data.should.have.property("Items");
                         res.body.data.Items.should.be.a("array");
-                        res.body.data.Items.length.should.eql(1);
+                        res.body.data.should.have.property("LastEvaluatedKey");
+                        res.body.data.LastEvaluatedKey.should.be.a("object");
+                        res.body.data.Items.length.should.eq(0);
                         res.body.should.have.property("count");
                         res.body.count.should.be.a("object");
                         res.body.count.should.have.property("Count");

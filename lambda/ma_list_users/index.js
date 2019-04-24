@@ -87,13 +87,16 @@ function getUsers(page) {
             Limit: page.pageSize,
             ExclusiveStartKey: page.lastEvaluatedKey,
             KeyConditionExpression: "#status = :status",
-            FilterConditionExpression: "begins_with(#name, " + page.searchText + ")",
+            FilterExpression: "contains(#name, :searchText) or contains(#login, :searchText)",
             ExpressionAttributeNames:{
-                "#status": "status"
+                "#status": "status",
+                "#name": "name",
+                "#login": "login"
             },
             ExpressionAttributeValues: {
-                ":status": "ACTIVE"
-            },
+                ":status": "ACTIVE",
+                ":searchText": page.searchText
+            }
         }).promise();
     else
         return documentClient.scan({
@@ -109,12 +112,15 @@ function getUsersCount(page) {
             TableName : "user",
             IndexName: "status-index",
             KeyConditionExpression: "#status = :status",
-            FilterConditionExpression: "begins_with(#name, " + page.searchText + ")",
+            FilterExpression: "contains(#name, :searchText) or contains(#login, :searchText)",
             ExpressionAttributeNames:{
-                "#status": "status"
+                "#status": "status",
+                "#name": "name",
+                "#login": "login"
             },
             ExpressionAttributeValues: {
-                ":status": "ACTIVE"
+                ":status": "ACTIVE",
+                ":searchText": page.searchText
             },
             Select: "COUNT"
         }).promise();
