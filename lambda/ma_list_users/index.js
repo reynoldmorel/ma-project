@@ -84,7 +84,6 @@ function getUsers(page) {
         return documentClient.query({
             TableName : "user",
             IndexName: "status-index",
-            Limit: page.pageSize,
             ExclusiveStartKey: page.lastEvaluatedKey,
             KeyConditionExpression: "#status = :status",
             FilterExpression: "contains(#name, :searchText) or contains(#login, :searchText)",

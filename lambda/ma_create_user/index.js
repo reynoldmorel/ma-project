@@ -48,7 +48,8 @@ exports.handler = (event, context, callback) => {
                     "login": event.body.login,
                     "password": crypto.createHash('md5').update(event.body.password).digest("hex"),
                     "roles": event.body.roles,
-                    "modifiedBy": currentUser.userId
+                    "modifiedBy": currentUser.userId,
+                    "status": "ACTIVE"
                 };
                 
                 putUser(user).then((data) => {
