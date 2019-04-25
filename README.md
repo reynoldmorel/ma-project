@@ -46,7 +46,7 @@ Get familiar with AWS concepts in their [documentation page](https://docs.aws.am
 A good tutorial that helps a lot understanding the setup from scratch was [this one](https://medium.com/@awskarthik82/part-1-securing-aws-api-gateway-using-aws-cognito-oauth2-scopes-410e7fb4a4c0). Follow the same steps considering:
 
 1. The DynamoDB table name for this project is **user**.
-2. Insert the following item manually, (**Please DO NOT change the _'login'_ field of this item, or unit tests won't work properly.**):
+2. Insert the following item manually, (**Please DO NOT change _'login and passwod'_ fields of this item, or unit tests won't work properly.**):
 ```
 {
   userId: "529322be-28cc-460d-972c-071a174080e3",
