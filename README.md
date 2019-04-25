@@ -28,8 +28,8 @@ npm install
 ```
 3. After this finishes, you will be able to run all tests locally, but wait! not yet, you still need to deploy the serverless aplication. 
 ### Technologies used in the project
-1. Mocha for automated testing.
-2. Chai is BDD/TDD assertion library, that makes TDD coding more readble.
+1. [Mocha](https://mochajs.org/) for automated testing.
+2. [Chai](https://www.chaijs.com/) is BDD/TDD assertion library, that makes TDD coding more readble.
 ### Setting up AWS
 If you don have an account of AWS you join for free [here](https://aws.amazon.com/free/). After your account is created you will need to check:
 1. AWS VPC.
