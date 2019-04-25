@@ -20,7 +20,7 @@ exports.handler = (event, context, callback) => {
 
     getUserById(event.queryStringParameters.currentUserId).then((currentUserResult) => {
         const currentUser = currentUserResult.Item;
-        if (currentUser && currentUser.roles.indexOf("ADMIN") > -1) {
+        if (currentUser && event.queryStringParameters.userId !== currentUser.userId && currentUser.roles.indexOf("ADMIN") > -1) {
 
             deleteUser(event.queryStringParameters.userId).then((data) => {
                 callback(
@@ -45,7 +45,7 @@ exports.handler = (event, context, callback) => {
             callback(
                 null, {
                     statusCode: 401,
-                    body: JSON.stringify("User not allowed to execute this action.")
+                    body: JSON.stringify("User cannot delete it self or User not allowed to execute this action.")
                 }
             );
         }

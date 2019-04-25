@@ -521,7 +521,7 @@ function testMAApiWithCleanDB(token, currentUser) {
 function textMAApiAccessesWithRoleUser(token, user) {
     describe("ma-user API tests accesses.", () => {
         describe("Create User", () => {
-            it("Should create a user Pablo", (done) => {
+            it("Should not create a user Pablo", (done) => {
                 chai.request(api.ma.host)
                     .put(api.ma.user.createService)
                     .set("Authorization", "Bearer " + token)
@@ -558,7 +558,7 @@ function textMAApiAccessesWithRoleUser(token, user) {
         });
 
         describe("Get User List", () => {
-            it("Should retrieve all existing users", (done) => {
+            it("Should not retrieve all existing users", (done) => {
                 chai.request(api.ma.host)
                     .get(api.ma.user.listService + "?currentUserId=" + user.userId)
                     .set("Authorization", "Bearer " + token)
