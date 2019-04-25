@@ -9,7 +9,7 @@ const api = {
         host: "https://ma-user.auth.us-east-1.amazoncognito.com",
         tokenService: "/oauth2/token?grant_type=client_credentials",
         headers: {
-            authorizationBasic: "Basic N2ZlZWxxcW1rZGtraGx2MHZsZDJvNDNmZWU6c3JnM3I1aW9xaWl0MGdldnZldmE0b29udmVwa3BkcWhwZGFlZWNzODlyMDFnaWgwdmg1",
+            authorizationBasic: "Basic N2ZlZWxxcW1rZGtraGx2MHZsZDJvNDNmZWU6c3JnM3I1aW9xaWl0MGdldnZldmE0b29udmVwa3BkcWhwZGFlZWNzODlyMDFnaWgwdmg1", // Authorization Basic Online Generator: https://www.blitter.se/utils/basic-authentication-header-generator/ - Username is your ClientID from Cognito and Password is your Secret from Cognito.
             contentType: "application/x-www-form-urlencoded"
         }
     },
