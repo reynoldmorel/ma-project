@@ -116,6 +116,6 @@ npm run test
 1. Project should never delete items. It should deactivate them using **status** column.
 2. Improve better search with pagination, since data is not sorted.
 3. Project should be allocated in an EC2 instance and lambda function should be executing pieces of code, so maintainability and scalability would be better.
-4. Project should use Authorization Code in OAuth 2.0 flow combined with Grant Type password, so JWT token could include user roles too, and we wouldn't need to filter user per each call to the API. Also it would be safer for the UI to use Authorization Code flow.
+4. Project should use Authorization Code in OAuth 2.0 flow and generate JWT token, so JWT token could include user roles too, and we wouldn't need to filter user per each call to the API. Also it would be safer for any UI to use Authorization Code flow.
 5. Include ECMAScript 6 and TypeScript to increase productivity and maintainability.
 6. More detailed documentation and description on each API logic and project setup.
