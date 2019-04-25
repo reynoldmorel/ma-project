@@ -1,41 +1,41 @@
 const AWS = require('aws-sdk'),
-	crypto = require('crypto'),
-	documentClient = new AWS.DynamoDB.DocumentClient();
-	
+    crypto = require('crypto'),
+    documentClient = new AWS.DynamoDB.DocumentClient();
+
 exports.handler = (event, context, callback) => {
-    if(!event.queryStringParameters || !event.queryStringParameters.userId || !event.queryStringParameters.currentUserId) {
+    if (!event.queryStringParameters || !event.queryStringParameters.userId || !event.queryStringParameters.currentUserId) {
         let message = "";
-        
-        if(!event.queryStringParameters || !event.queryStringParameters.userId) message += "Missing 'userId' property on parameters. Please check. ";
-        if(!event.queryStringParameters || !event.queryStringParameters.currentUserId) message += "Missing 'currentUserId' property on request body. Please check. ";
-        
+
+        if (!event.queryStringParameters || !event.queryStringParameters.userId) message += "Missing 'userId' property on parameters. Please check. ";
+        if (!event.queryStringParameters || !event.queryStringParameters.currentUserId) message += "Missing 'currentUserId' property on request body. Please check. ";
+
         callback(
-            null, 
-            {
+            null, {
                 statusCode: 500,
                 body: JSON.stringify(message)
             }
         );
         return;
     }
-    
+
     getUserById(event.queryStringParameters.currentUserId).then((currentUserResult) => {
         const currentUser = currentUserResult.Item;
-        if(currentUser && currentUser.roles.indexOf("ADMIN") > -1) {
-        
+        if (currentUser && currentUser.roles.indexOf("ADMIN") > -1) {
+
             deleteUser(event.queryStringParameters.userId).then((data) => {
                 callback(
-                    null, 
-                    {
+                    null, {
                         statusCode: 200,
-                        body: JSON.stringify({data: data, message: "User deleted successfully."})
+                        body: JSON.stringify({
+                            data: data,
+                            message: "User deleted successfully."
+                        })
                     }
                 );
             }).catch((err) => {
                 console.error(err);
                 callback(
-                    null, 
-                    {
+                    null, {
                         statusCode: 500,
                         body: JSON.stringify(err)
                     }
@@ -43,18 +43,16 @@ exports.handler = (event, context, callback) => {
             });
         } else {
             callback(
-                null, 
-                {
+                null, {
                     statusCode: 401,
                     body: JSON.stringify("User not allowed to execute this action.")
                 }
-            );            
+            );
         }
     }).catch((err) => {
         console.error(err);
         callback(
-            null, 
-            {
+            null, {
                 statusCode: 500,
                 body: JSON.stringify(err)
             }
@@ -65,7 +63,7 @@ exports.handler = (event, context, callback) => {
 function deleteUser(userId) {
     return documentClient.delete({
         TableName: 'user',
-        Key:{
+        Key: {
             "userId": userId
         }
     }).promise();
@@ -73,8 +71,8 @@ function deleteUser(userId) {
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName : "user",
-        Key:{
+        TableName: "user",
+        Key: {
             "userId": userId
         }
     }).promise();
