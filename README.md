@@ -30,6 +30,7 @@ npm install
 ### Technologies used in the project
 1. [Mocha](https://mochajs.org/) for automated testing.
 2. [Chai](https://www.chaijs.com/) is BDD/TDD assertion library, that makes TDD coding more readble.
+3. [Serverless](https://serverless.com/framework/docs/)  is a CLI tool that allows users to build & deploy auto-scaling, pay-per-execution, event-driven functions.
 ### Setting up AWS
 If you don have an account of AWS you join for free [here](https://aws.amazon.com/free/). After your account is created you will need to check:
 1. AWS VPC.
@@ -41,12 +42,22 @@ If you don have an account of AWS you join for free [here](https://aws.amazon.co
 
 **This setup will be under the region us-east-1, specifically N. Virginia**
 
-Get familiar with AWS concepts in their [documentation page](https://docs.aws.amazon.com/). Amazon has a bunch of good really helpful information. 
+Get familiar with AWS concepts in their [documentation page](https://docs.aws.amazon.com/). Amazon has a bunch of good really helpful information.
 
-A good tutorial that helps a lot understanding the setup from scratch was [this one](https://medium.com/@awskarthik82/part-1-securing-aws-api-gateway-using-aws-cognito-oauth2-scopes-410e7fb4a4c0). Follow the same steps considering:
+### Setting up Serverless
+1. To install Serverless, go here: https://serverless.com/framework/docs/providers/aws/guide/installation/
+2. Create a user in AWS IAM and download the .csv with the credentials.
+3. To setup your AWS credentials in the cmd so that serverless could take it, go here: https://serverless.com/framework/docs/providers/aws/guide/credentials/
 
-1. The DynamoDB table name for this project is **user**.
-2. Insert the following item manually, (**Please DO NOT change _'login and passwod'_ fields of this item, or unit tests won't work properly.**):
+### Folder Structure
+1. All lambda functions are within **lambda** folder.
+2. All serverless resources are within **recources** folder. Here we will see the configuration of: *Coginto, DynamoDB and the Endpoints*
+3. All tests are within the **test** folder.
+4. *Serverless.yml* contains the serverless script to be deployed in your AWS account.
+
+First step is mandatory. After that the other stpes helps to secure each endpoint with Oauth 2.0
+
+1. Insert this following item manually, (**Please DO NOT change _'login and passwod'_ fields of this item, or unit tests won't work properly.**):
 ```
 {
   userId: "529322be-28cc-460d-972c-071a174080e3",
@@ -57,38 +68,35 @@ A good tutorial that helps a lot understanding the setup from scratch was [this 
   status: "ACTIVE",
 }
 ```
-2. Go to [IAM](https://console.aws.amazon.com/iam/home?region=us-east-1#/home) and create the role **ma-role** with the following policies:
-    * AmazonAPIGatewayInvokeFullAccess
-    * AmazonAPIGatewayPushToCloudWatchLogs
-    * AmazonDynamoDBFullAccess
-    * AmazonCognitoDeveloperAuthenticatedIdentities
-    * CloudWatchLogsFullAccess
-    * AmazonAPIGatewayAdministrator
-    * AmazonVPCFullAccess
-3. Your user pool name will be **ma-users-${currentDateTimeInMillis}**.
-4. Your app client name will be **ma-trusted-user-${currentDateTimeInMillis}**.
-5. Your resources will be:
-    * ma-resources/delete_user
-    * ma-resources/write_user
-    * ma-resources/read_user
-6. Your domain name will be **ma-user-${currentDateTimeInMillis}**.
-7. All lambda functions you need to create are in the project, under **$PROJECT_DIR/lambda**. Each folder within **lambda folder** represents the name of the lambda function and its content. So when you create a lambda function make sure to write the correct name as per the folders. *Example: you should create a lambda function with the name ma_login*
-8. Remember to copy the index.js content their respective lambda function. You should create a total of 6 lambda functions.
-9. Use the existing **ma-role** for all lambda function.
-10. The API name you will create within API Gateway will be **ma-user-${currentDateTimeInMillis}**.
-11. Create and setup the following API resources:
-    * **Name:** create, **Method:** PUT, **Lambda function:** ma_create_user, **scope:** ma-resources/write_user
-    * **Name:** delete, **Method:** DELETE - **Lambda function:** ma_delete_user, **scope:** ma-resources/delete_user
-    * **Name:** list, **Method:** GET, **Lambda function:** ma_list_users, **scope:** ma-resources/read_user
-    * **Name:** login, **Method:** POST, **Lambda function:** ma_login
-    * **Name:** update, **Method:** POST, **Lambda function:** ma_update_user, **scope:** ma-resources/write_user
-    * **Name:** update-password, **Method:** POST, **Lambda function:** ma_update_password, **scope:** ma-resources/write_user
+2. Go to cognito and configure your User Pool Client to have App Integration:
+    * Create and app domain for oauth 2.0 authentication.
+    * In resource, Create these following resources:
+      * ma-resources/delete_user
+      * ma-resources/write_user
+      * ma-resources/read_user
+    * In app client settings:
+      * Enable Identity Providers by checking Cognito User Pool.
+      * Check on client_credentials
+      * Check on all resource added above.
+      * Save changes.
+3. Within API Gateway:
+    * Create a cognito authorizer:
+      * Select the created user pool client
+      * In token source write authorization
+      * Save changes
+    * Secure the following API resources:
+      * **Name:** create, **Method:** PUT, **Lambda function:** ma_create_user, **scope:** ma-resources/write_user
+      * **Name:** delete, **Method:** DELETE - **Lambda function:** ma_delete_user, **scope:** ma-resources/delete_user
+      * **Name:** list, **Method:** GET, **Lambda function:** ma_list_users, **scope:** ma-resources/read_user
+      * **Name:** login, **Method:** POST, **Lambda function:** ma_login
+      * **Name:** update, **Method:** POST, **Lambda function:** ma_update_user, **scope:** ma-resources/write_user
+      * **Name:** update-password, **Method:** POST, **Lambda function:** ma_update_password, **scope:** ma-resources/write_user
 12. Remember deploying the API.
 13. After the API is deployed, go to the project and open the file **$PROJECT_DIR/test/test.js**. Here you will find all the unit tests. Replace api URLs and parameters as follows:
 ```
 const api = {
     oauth: {
-        host: "https://ma-user-${currentDateTimeInMillis}.auth.us-east-1.amazoncognito.com",
+        host: "https://${OAUTH2.0_DOAMAIN_NAME}.auth.us-east-1.amazoncognito.com",
         tokenService: "/oauth2/token?grant_type=client_credentials",
         headers: {
             authorizationBasic: "Basic PASTE_YOUR_GENERATED_TOKEN", // Authorization Basic Online Generator: https://www.blitter.se/utils/basic-authentication-header-generator/ - Username is your ClientID from Cognito and Password is your Secret from Cognito.
@@ -96,7 +104,7 @@ const api = {
         }
     },
     ma: {
-        host: "${apiHostFromApiGateway}/${deployName}",
+        host: "${API_SERVICE_ENDPOINT}/${STAGE}",
         user: {
             loginService: "/login",
             listService: "/list",
@@ -115,7 +123,7 @@ npm run test
 ## Future Enhancements
 1. Project should never delete items. It should deactivate them using **status** column.
 2. Improve better search with pagination, since data is not sorted.
-3. Project should be allocated in an EC2 instance and lambda function should be executing pieces of code, so maintainability and scalability would be better.
+3. Automate Authorizer creation and User Pool Client Configuration.
 4. Project should use Authorization Code in OAuth 2.0 flow and generate JWT token, so JWT token could include user roles too, and we wouldn't need to filter user per each call to the API. Also it would be safer for any UI to use Authorization Code flow.
 5. Include ECMAScript 6 and TypeScript to increase productivity and maintainability.
 6. More detailed documentation and description on each API logic and project setup.
