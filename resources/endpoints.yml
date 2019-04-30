@@ -1,0 +1,8 @@
+candidateSubmission:
+  handler: api/candidate.submit
+  memorySize: 128
+  description: Submit candidate information and starts interview process Hello.
+  events:
+    - http: 
+        path: candidate
+        method: get
