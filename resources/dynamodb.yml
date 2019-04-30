@@ -1,27 +1,61 @@
 Resources:
-  CandidatesDynamoDbTable:
+  UserDynamoDbTable:
     Type: 'AWS::DynamoDB::Table'
     DeletionPolicy: Retain
     Properties:
       AttributeDefinitions:
-        -
-          AttributeName: "userId"
-          AttributeType: "S"   
+        - AttributeName: "userId"
+          AttributeType: "S"
+        - AttributeName: "login"
+          AttributeType: "S"
+        - AttributeName: "name"
+          AttributeType: "S"
+        - AttributeName: "status"
+          AttributeType: "S"
       KeySchema:
-        -
-          AttributeName: "userId"
+        - AttributeName: "userId"
           KeyType: "HASH"
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
       StreamSpecification:
         StreamViewType: "NEW_AND_OLD_IMAGES"
-      LocalSecondaryIndexes:
-              - IndexName: userId-index
-                KeySchema:
-                - AttributeName: Album
-                  KeyType: HASH
-                - AttributeName: Sales
-                  KeyType: RANGE
-                Projection: ALL
+      GlobalSecondaryIndexes:
+        - IndexName: userId-index
+          KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: login-index
+          KeySchema:
+          - AttributeName: login
+            KeyType: HASH
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: name-index
+          KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+        - IndexName: status-index
+          KeySchema:
+          - AttributeName: status
+            KeyType: HASH
+          Projection: 
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+
       TableName: ${self:provider.environment.USER_TABLE_NAME}

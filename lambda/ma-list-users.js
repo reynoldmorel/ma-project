@@ -82,7 +82,7 @@ exports.handler = (event, context, callback) => {
 function getUsers(page) {
     if (page.searchText)
         return documentClient.query({
-            TableName: "user",
+            TableName: process.env.USER_TABLE_NAME,
             IndexName: "status-index",
             Limit: page.pageSize,
             ExclusiveStartKey: page.lastEvaluatedKey,
@@ -100,7 +100,7 @@ function getUsers(page) {
         }).promise();
     else
         return documentClient.scan({
-            TableName: "user",
+            TableName: process.env.USER_TABLE_NAME,
             Limit: page.pageSize,
             ExclusiveStartKey: page.lastEvaluatedKey
         }).promise();
@@ -109,7 +109,7 @@ function getUsers(page) {
 function getUsersCount(page) {
     if (page.searchText)
         return documentClient.query({
-            TableName: "user",
+            TableName: process.env.USER_TABLE_NAME,
             IndexName: "status-index",
             KeyConditionExpression: "#status = :status",
             FilterExpression: "contains(#name, :searchText) or contains(#login, :searchText)",
@@ -126,14 +126,14 @@ function getUsersCount(page) {
         }).promise();
     else
         return documentClient.scan({
-            TableName: "user",
+            TableName: process.env.USER_TABLE_NAME,
             Select: "COUNT"
         }).promise();
 }
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }
@@ -142,7 +142,7 @@ function getUserById(userId) {
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }

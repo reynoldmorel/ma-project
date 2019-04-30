@@ -1,8 +1,42 @@
-candidateSubmission:
-  handler: api/candidate.submit
+MaCreateUser:
+  handler: lambda/ma-create-user.handler
   memorySize: 128
-  description: Submit candidate information and starts interview process Hello.
   events:
     - http: 
-        path: candidate
+        path: create
+        method: put
+MaDeleteUser:
+  handler: lambda/ma-delete-user.handler
+  memorySize: 128
+  events:
+    - http: 
+        path: delete
+        method: delete
+MaListUsers:
+  handler: lambda/ma-list-users.handler
+  memorySize: 128
+  events:
+    - http: 
+        path: list
         method: get
+MaLogin:
+  handler: lambda/ma-login.handler
+  memorySize: 128
+  events:
+    - http: 
+        path: login
+        method: post
+MaUpdatePassword:
+  handler: lambda/ma-update-password.handler
+  memorySize: 128
+  events:
+    - http: 
+        path: update-password
+        method: post
+MaUpdate:
+  handler: lambda/ma-update-user.handler
+  memorySize: 128
+  events:
+    - http: 
+        path: update
+        method: post

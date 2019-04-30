@@ -62,7 +62,7 @@ exports.handler = (event, context, callback) => {
 
 function deleteUser(userId) {
     return documentClient.delete({
-        TableName: 'user',
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }
@@ -71,7 +71,7 @@ function deleteUser(userId) {
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }

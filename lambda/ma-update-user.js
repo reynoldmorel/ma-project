@@ -1,18 +1,16 @@
 const AWS = require('aws-sdk'),
-    uuid = require('uuid'),
-    crypto = require('crypto'),
     documentClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
 
     if (event.body) event.body = JSON.parse(event.body)
 
-    if (!event.body || !event.body.currentUserId || !event.body.login || !event.body.password) {
+    if (!event.body || !event.body.currentUserId || !event.body.userId || !event.body.login) {
         let message = "";
 
         if (!event.body || !event.body.currentUserId) message += "Missing 'currentUserId' property on request body. Please check. ";
+        if (!event.body || !event.body.userId) message += "Missing 'userId' property on parameters. Please check. ";
         if (!event.body || !event.body.login) message += "Missing 'login' property on request body. Please check. ";
-        if (!event.body || !event.body.password) message += "Missing 'password' property on request body. Please check. ";
 
         callback(
             null, {
@@ -25,12 +23,12 @@ exports.handler = (event, context, callback) => {
 
     getUserById(event.body.currentUserId).then((currentUserResult) => {
         const currentUser = currentUserResult.Item;
-        if (currentUser && currentUser.roles.indexOf("ADMIN") > -1) {
+        if (currentUser && (event.body.userId === currentUser.userId || currentUser.roles.indexOf("ADMIN") > -1)) {
 
             if (!event.body.roles) event.body.roles = ["DEFAULT"];
 
             getUserByLogin(event.body.login).then((data) => {
-                if (data.Items.length > 0) {
+                if (data.Items.length > 0 && data.Items[0].userId !== event.body.userId) {
                     callback(
                         null, {
                             statusCode: 500,
@@ -41,22 +39,20 @@ exports.handler = (event, context, callback) => {
                 }
 
                 const user = {
-                    "userId": uuid.v1(),
+                    "userId": event.body.userId,
                     "name": event.body.name ? event.body.name : event.body.login,
                     "login": event.body.login,
-                    "password": crypto.createHash('md5').update(event.body.password).digest("hex"),
                     "roles": event.body.roles,
-                    "modifiedBy": currentUser.userId,
-                    "status": "ACTIVE"
+                    "modifiedBy": currentUser.userId
                 };
 
-                putUser(user).then((data) => {
+                updateUser(user).then((data) => {
                     callback(
                         null, {
                             statusCode: 200,
                             body: JSON.stringify({
                                 data: data,
-                                message: "User created successfully."
+                                message: "User updated successfully."
                             })
                         }
                     );
@@ -97,16 +93,31 @@ exports.handler = (event, context, callback) => {
     });
 };
 
-function putUser(user) {
-    return documentClient.put({
-        TableName: 'user',
-        Item: user
+function updateUser(user) {
+    return documentClient.update({
+        TableName: process.env.USER_TABLE_NAME,
+        Key: {
+            "userId": user.userId
+        },
+        UpdateExpression: "set #name = :name, #login = :login, #roles = :roles, #modifiedBy = :modifiedBy",
+        ExpressionAttributeNames: {
+            "#name": "name",
+            "#login": "login",
+            "#roles": "roles",
+            "#modifiedBy": "modifiedBy"
+        },
+        ExpressionAttributeValues: {
+            ":name": user.name,
+            ":login": user.login,
+            ":roles": user.roles,
+            ":modifiedBy": user.modifiedBy
+        }
     }).promise();
 }
 
 function getUserByLogin(login) {
     return documentClient.query({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         IndexName: "login-index",
         KeyConditionExpression: "#login = :login",
         ExpressionAttributeNames: {
@@ -120,7 +131,7 @@ function getUserByLogin(login) {
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }

@@ -37,12 +37,17 @@ exports.handler = (event, context, callback) => {
                 response.statusCode = 403;
             }
 
-            response.message = JSON.stringify(response.message);
+            response.body = JSON.stringify(response.body);
 
             callback(
-                null,
-                response
+                null, {
+                    statusCode: response.statusCode,
+                    body: JSON.stringify({
+                        message: response.message
+                    })
+                }
             );
+
             return;
         }
 
@@ -69,7 +74,7 @@ exports.handler = (event, context, callback) => {
 
 function getUserByLogin(login) {
     return documentClient.query({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         IndexName: "login-index",
         KeyConditionExpression: "#login = :login",
         ExpressionAttributeNames: {
