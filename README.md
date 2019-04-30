@@ -91,8 +91,8 @@ First step is mandatory. After that the other stpes helps to secure each endpoin
       * **Name:** login, **Method:** POST, **Lambda function:** ma_login
       * **Name:** update, **Method:** POST, **Lambda function:** ma_update_user, **scope:** ma-resources/write_user
       * **Name:** update-password, **Method:** POST, **Lambda function:** ma_update_password, **scope:** ma-resources/write_user
-12. Remember deploying the API.
-13. After the API is deployed, go to the project and open the file **$PROJECT_DIR/test/test.js**. Here you will find all the unit tests. Replace api URLs and parameters as follows:
+4. Remember deploying the API.
+5. After the API is deployed, go to the project and open the file **$PROJECT_DIR/test/test.js**. Here you will find all the unit tests. Replace api URLs and parameters as follows:
 ```
 const api = {
     oauth: {
@@ -116,7 +116,7 @@ const api = {
     }
 };
 ```
-14. After this is all setup you run the command:
+6. After this is all setup you run the command:
 ```
 npm run test
 ```
