@@ -1,16 +1,18 @@
 const AWS = require('aws-sdk'),
+    crypto = require('crypto'),
     documentClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
 
     if (event.body) event.body = JSON.parse(event.body)
 
-    if (!event.body || !event.body.currentUserId || !event.body.userId || !event.body.login) {
+    if (!event.body || !event.body.currentUserId || !event.body.login || !event.body.password || !event.body.oldPassword) {
         let message = "";
 
         if (!event.body || !event.body.currentUserId) message += "Missing 'currentUserId' property on request body. Please check. ";
-        if (!event.body || !event.body.userId) message += "Missing 'userId' property on parameters. Please check. ";
         if (!event.body || !event.body.login) message += "Missing 'login' property on request body. Please check. ";
+        if (!event.body || !event.body.password) message += "Missing 'password' property on request body. Please check. ";
+        if (!event.body || !event.body.oldPassword) message += "Missing 'oldPassword' property on request body. Please check. ";
 
         callback(
             null, {
@@ -23,36 +25,41 @@ exports.handler = (event, context, callback) => {
 
     getUserById(event.body.currentUserId).then((currentUserResult) => {
         const currentUser = currentUserResult.Item;
-        if (currentUser && (event.body.userId === currentUser.userId || currentUser.roles.indexOf("ADMIN") > -1)) {
-
-            if (!event.body.roles) event.body.roles = ["DEFAULT"];
+        if (currentUser && (currentUser.roles.indexOf("ADMIN") > -1 || currentUser.roles.indexOf("USER") > -1)) {
 
             getUserByLogin(event.body.login).then((data) => {
-                if (data.Items.length > 0 && data.Items[0].userId !== event.body.userId) {
+
+                const encryptedOldPassword = crypto.createHash('md5').update(event.body.oldPassword).digest("hex");
+
+                if (data.Items.length === 0 || data.Items[0].password !== encryptedOldPassword) {
+
+                    let message = "";
+
+                    if (data.Items.length === 0) message += "User does not exist. Please check. ";
+                    else if (data.Items[0].password !== encryptedOldPassword) message += "Old password does not match current password. Please check. ";
+
                     callback(
                         null, {
                             statusCode: 500,
-                            body: JSON.stringify("Duplicated login property value. Please check.")
+                            body: message
                         }
                     );
                     return;
                 }
 
                 const user = {
-                    "userId": event.body.userId,
-                    "name": event.body.name ? event.body.name : event.body.login,
-                    "login": event.body.login,
-                    "roles": event.body.roles,
+                    "userId": data.Items[0].userId,
+                    "password": crypto.createHash('md5').update(event.body.password).digest("hex"),
                     "modifiedBy": currentUser.userId
                 };
 
-                updateUser(user).then((data) => {
+                updatePassword(user).then((data) => {
                     callback(
                         null, {
                             statusCode: 200,
                             body: JSON.stringify({
                                 data: data,
-                                message: "User updated successfully."
+                                message: "Password updated successfully."
                             })
                         }
                     );
@@ -74,6 +81,7 @@ exports.handler = (event, context, callback) => {
                     }
                 );
             });
+
         } else {
             callback(
                 null, {
@@ -91,25 +99,23 @@ exports.handler = (event, context, callback) => {
             }
         );
     });
+
+
 };
 
-function updateUser(user) {
+function updatePassword(user) {
     return documentClient.update({
-        TableName: 'user',
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": user.userId
         },
-        UpdateExpression: "set #name = :name, #login = :login, #roles = :roles, #modifiedBy = :modifiedBy",
+        UpdateExpression: "set #password = :password, #modifiedBy = :modifiedBy",
         ExpressionAttributeNames: {
-            "#name": "name",
-            "#login": "login",
-            "#roles": "roles",
+            "#password": "password",
             "#modifiedBy": "modifiedBy"
         },
         ExpressionAttributeValues: {
-            ":name": user.name,
-            ":login": user.login,
-            ":roles": user.roles,
+            ":password": user.password,
             ":modifiedBy": user.modifiedBy
         }
     }).promise();
@@ -117,7 +123,7 @@ function updateUser(user) {
 
 function getUserByLogin(login) {
     return documentClient.query({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         IndexName: "login-index",
         KeyConditionExpression: "#login = :login",
         ExpressionAttributeNames: {
@@ -131,7 +137,7 @@ function getUserByLogin(login) {
 
 function getUserById(userId) {
     return documentClient.get({
-        TableName: "user",
+        TableName: process.env.USER_TABLE_NAME,
         Key: {
             "userId": userId
         }

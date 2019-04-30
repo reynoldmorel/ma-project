@@ -14,7 +14,7 @@ const api = {
         }
     },
     ma: {
-        host: "https://3j6benqmij.execute-api.us-east-1.amazonaws.com/prod",
+        host: "https://cbnkhwnt5g.execute-api.us-east-1.amazonaws.com/prod",
         user: {
             loginService: "/login",
             listService: "/list",
@@ -369,7 +369,7 @@ function testMAApiWithCleanDB(token, currentUser) {
         describe("Get User List searching for jose", () => {
             it("Should retrieve list of 5 users with total count = 29 for searText = 'jose'", (done) => {
                 chai.request(api.ma.host)
-                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=6&searchText=jose")
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=5&searchText=jose")
                     .set("Authorization", "Bearer " + token)
                     .end((err, res) => {
                         res.should.have.status(200);
@@ -392,7 +392,7 @@ function testMAApiWithCleanDB(token, currentUser) {
         describe("Get User List searching for jose. Login, update password and login again", () => {
             it("Should retrieve list of 5 users with total count = 29 for searText = 'jose'. Take the first one and test update password with login.", (done) => {
                 chai.request(api.ma.host)
-                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=6&searchText=jose")
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=5&searchText=jose")
                     .set("Authorization", "Bearer " + token)
                     .end((err, res) => {
                         res.should.have.status(200);
@@ -475,7 +475,7 @@ function testMAApiWithCleanDB(token, currentUser) {
         describe("Get User List searching for jose. Login, try creating, updating, deleting and getting users", () => {
             it("Should retrieve list of 5 users with total count = 29 for searText = 'jose'. Take the first one and test accesses.", (done) => {
                 chai.request(api.ma.host)
-                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=6&searchText=jose")
+                    .get(api.ma.user.listService + "?currentUserId=" + currentUser.userId + "&pageSize=5&searchText=jose")
                     .set("Authorization", "Bearer " + token)
                     .end((err, res) => {
                         res.should.have.status(200);
